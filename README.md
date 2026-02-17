@@ -1,27 +1,81 @@
-# Planetiler OpenMapTiles Profile
+# iOverlander Planetiler OpenMapTiles Profile
 
-This OpenMapTiles profile for [Planetiler](https://github.com/onthegomap/planetiler) is based
-on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
+Fork of [planetiler-openmaptiles](https://github.com/openmaptiles/planetiler-openmaptiles) with customized zoom thresholds for iOverlander maps. Shows more detail (roads, labels, shields) at lower zoom levels than the default OpenMapTiles schema.
+
+## iOverlander Changes
+
+Zoom threshold modifications to show more detail when zoomed out:
+
+| Feature | Default | iOverlander | File |
+|---------|---------|-------------|------|
+| Secondary roads | z9 | **z8** | `Transportation.java` |
+| Tertiary roads | z11 | **z9** | `Transportation.java` |
+| Minor roads | z12 | **z11** | `Transportation.java` |
+| Service roads | z13 | **z12** | `Transportation.java` |
+| Track roads | z14 | **z12** | `Transportation.java` |
+| Primary road shields | z12 | **z10** | `TransportationName.java` |
+| Secondary road shields | z12 | **z11** | `TransportationName.java` |
+| Town name grid limits | 4 per tile at z8 | **8 per tile at z8** | `Place.java` |
 
 ## How to run
 
-Using pre-built docker image:
+### With Docker (recommended)
+
+Build the custom image:
 
 ```bash
-docker run --rm -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
+docker build -t ioverlander-planetiler .
 ```
 
-Or to build from source, after [installing Java 21+](https://adoptium.net/installation):
+Generate tiles for a test region:
 
 ```bash
-# Build the project (use mvnw.cmd on windows):
-./mvnw clean package
-# Then run:
+docker run --rm -v "$(pwd)/data":/data ioverlander-planetiler \
+  --force --download --area=monaco
+```
+
+Generate full planet (~3 hours on 16 cores, ~96GB output):
+
+```bash
+docker run --rm -v "$(pwd)/data":/data \
+  -e JAVA_TOOL_OPTIONS="-Xmx110g" \
+  ioverlander-planetiler \
+  --download --area=planet --bounds=planet \
+  --download-threads=10 --download-chunk-size-mb=1000 \
+  --fetch-wikidata \
+  --force --output=data/planet.mbtiles \
+  --nodemap-type=array --storage=mmap
+```
+
+### From source
+
+Requires [Java 21+](https://adoptium.net/installation):
+
+```bash
+./mvnw clean package -DskipTests
+
+# Test with Monaco
 java -jar target/*with-deps.jar --force --download --area=monaco
+
+# Full planet
+java -Xmx110g -jar target/*with-deps.jar \
+  --download --area=planet --bounds=planet \
+  --download-threads=10 --download-chunk-size-mb=1000 \
+  --fetch-wikidata \
+  --force --output=data/planet.mbtiles \
+  --nodemap-type=array --storage=mmap
 ```
 
-See [Planetiler README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) for more description of the
-available options.
+### Hardware requirements for planet generation
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| RAM | 32GB (mmap) | 128GB |
+| Disk | ~850GB SSD | 1TB+ |
+| CPU | 8 cores | 16-64 cores |
+| Java | 21+ | 21+ |
+
+See [Planetiler README.md](https://github.com/onthegomap/planetiler/blob/main/README.md) for more options.
 
 ## Differences from OpenMapTiles
 
