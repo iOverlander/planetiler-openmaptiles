@@ -112,9 +112,9 @@ public class Place implements
   private static final double MAX_CITY_POPULATION = 100_000_000d;
   private static final Set<String> MAJOR_CITY_PLACES = Set.of("city", "town", "village");
   private static final ZoomFunction<Number> LABEL_GRID_LIMITS = ZoomFunction.fromMaxZoomThresholds(Map.of(
-    8, 4,
-    9, 8,
-    10, 12,
+    8, 8,
+    9, 12,
+    10, 16,
     12, 14
   ), 0);
   private final Translations translations;

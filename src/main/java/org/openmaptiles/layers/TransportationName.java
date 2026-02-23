@@ -245,7 +245,9 @@ public class TransportationName implements
 
     int minzoom = FieldValues.CLASS_TRUNK.equals(baseClass) ? 8 :
       FieldValues.CLASS_MOTORWAY.equals(baseClass) ? 6 :
-      isLink ? 13 : 12; // fallback - get from line minzoom, but floor at 12
+      FieldValues.CLASS_PRIMARY.equals(baseClass) ? 10 :
+      FieldValues.CLASS_SECONDARY.equals(baseClass) ? 11 :
+      isLink ? 13 : 10; // fallback - get from line minzoom, but floor at 10
 
     // inherit min zoom threshold from visible road, and ensure we never show a label on a road that's not visible yet.
     minzoom = Math.max(minzoom, transportation.getMinzoomAndClass(element, highwayClass).minzoom());
